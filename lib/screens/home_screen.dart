@@ -155,6 +155,34 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
             const SizedBox(height: 15),
+
+            StreamBuilder<List<Item>>(
+              stream: service.streamItems(),
+              builder: (context, snapshot) {
+                final items = snapshot.data ?? [];
+                double total = 0;
+
+                for (var item in items) {
+                  total += item.quantity * item.price;
+                }
+
+                return Card(
+                  child: Padding(
+                    padding: const EdgeInsets.all(12),
+                    child: Text(
+                      'Total Value: \$${total.toStringAsFixed(2)}',
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+
+            const SizedBox(height: 10),
+
             Expanded(
               child: StreamBuilder<List<Item>>(
                 stream: service.streamItems(),
@@ -181,8 +209,18 @@ class _HomeScreenState extends State<HomeScreen> {
                       return Card(
                         child: ListTile(
                           title: Text(item.name),
-                          subtitle: Text(
-                            'Qty: ${item.quantity} | Price: \$${item.price.toStringAsFixed(2)}',
+                          subtitle: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Qty: ${item.quantity} | Price: \$${item.price.toStringAsFixed(2)}',
+                              ),
+                              if (item.quantity < 2)
+                                const Text(
+                                  '⚠️ Low Stock',
+                                  style: TextStyle(color: Colors.red),
+                                ),
+                            ],
                           ),
                           trailing: Row(
                             mainAxisSize: MainAxisSize.min,
