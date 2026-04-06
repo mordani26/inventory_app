@@ -155,34 +155,42 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
             const SizedBox(height: 15),
+            Card(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(12),
+                child: StreamBuilder<List<Item>>(
+                  stream: service.streamItems(),
+                  builder: (context, snapshot) {
+                    final items = snapshot.data ?? [];
+                    double total = 0;
 
-            StreamBuilder<List<Item>>(
-              stream: service.streamItems(),
-              builder: (context, snapshot) {
-                final items = snapshot.data ?? [];
-                double total = 0;
+                    for (var item in items) {
+                      total += item.quantity * item.price;
+                    }
 
-                for (var item in items) {
-                  total += item.quantity * item.price;
-                }
-
-                return Card(
-                  child: Padding(
-                    padding: const EdgeInsets.all(12),
-                    child: Text(
-                      'Total Value: \$${total.toStringAsFixed(2)}',
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                );
-              },
+                    return Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(Icons.attach_money, color: Colors.green),
+                        const SizedBox(width: 5),
+                        Text(
+                          total.toStringAsFixed(2),
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.teal,
+                          ),
+                        ),
+                      ],
+                    );
+                  },
+                ),
+              ),
             ),
-
             const SizedBox(height: 10),
-
             Expanded(
               child: StreamBuilder<List<Item>>(
                 stream: service.streamItems(),
@@ -206,42 +214,48 @@ class _HomeScreenState extends State<HomeScreen> {
                     itemBuilder: (context, index) {
                       final item = items[index];
 
-                      return Card(
-                        child: ListTile(
-                          title: Text(item.name),
-                          subtitle: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Qty: ${item.quantity} | Price: \$${item.price.toStringAsFixed(2)}',
-                              ),
-                              if (item.quantity < 2)
-                                const Text(
-                                  '⚠️ Low Stock',
-                                  style: TextStyle(color: Colors.red),
-                                ),
-                            ],
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 5),
+                        child: Card(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
                           ),
-                          trailing: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              IconButton(
-                                icon: const Icon(
-                                  Icons.edit,
-                                  color: Colors.blue,
+                          child: ListTile(
+                            title: Text(item.name),
+                            subtitle: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Qty: ${item.quantity} | Price: \$${item.price.toStringAsFixed(2)}',
                                 ),
-                                onPressed: () => loadItemForEdit(item),
-                              ),
-                              IconButton(
-                                icon: const Icon(
-                                  Icons.delete,
-                                  color: Colors.red,
+                                if (item.quantity < 2)
+                                  const Text(
+                                    '⚠️ Low Stock',
+                                    style: TextStyle(color: Colors.red),
+                                  ),
+                              ],
+                            ),
+                            trailing: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                IconButton(
+                                  icon: const Icon(
+                                    Icons.edit,
+                                    color: Colors.blue,
+                                  ),
+                                  onPressed: () => loadItemForEdit(item),
                                 ),
-                                onPressed: () async {
-                                  await service.deleteItem(item.id!);
-                                },
-                              ),
-                            ],
+                                IconButton(
+                                  icon: const Icon(
+                                    Icons.delete,
+                                    color: Colors.red,
+                                  ),
+                                  onPressed: () async {
+                                    await service.deleteItem(item.id!);
+                                  },
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                       );
